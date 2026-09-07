@@ -1,0 +1,2934 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Road to the Final</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <header class="app-header">
+        <h1>Road to the Final</h1>
+
+        <p class="subtitle">
+            Live AI football prediction and match analysis
+        </p>
+    </header>
+
+    {% if message %}
+        <div class="message">
+            {{ message }}
+        </div>
+    {% endif %}
+
+    <form method="POST">
+
+        <section class="card" id="match-selection">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">
+                        Match Setup
+                    </p>
+
+                    <h2>Select Match</h2>
+                </div>
+            </div>
+
+            <div class="grid">
+
+                <div>
+                    <label for="team1">
+                        Team 1
+                    </label>
+
+                    <select
+                        id="team1"
+                        name="team1"
+                    >
+                        {% for team in teams %}
+                            <option
+                                value="{{ team.name }}"
+                                {% if team.name == team1.name %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ team.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="team2">
+                        Team 2
+                    </label>
+
+                    <select
+                        id="team2"
+                        name="team2"
+                    >
+                        {% for team in teams %}
+                            <option
+                                value="{{ team.name }}"
+                                {% if team.name == team2.name %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ team.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- ================================================================
+SECTION 05: HEAD-TO-HEAD
+PURPOSE:
+Displays historical results between the two selected teams.
+
+RECENT-MEETING ORDER:
+Home Team → Home-Away Score → Away Team
+
+Example:
+Spain → 6-1 → Argentina
+================================================================ -->
+
+<section
+    class="card h2h-card"
+    id="head-to-head"
+>
+
+    <div class="section-heading">
+
+        <div>
+            <p class="section-kicker">
+                Pre-Match Intelligence
+            </p>
+
+            <h2>Head-to-Head</h2>
+        </div>
+
+        <span class="info-chip">
+            {% if h2h.available %}
+                Last {{ h2h.total_meetings }}
+                completed
+                {% if h2h.total_meetings == 1 %}
+                    meeting
+                {% else %}
+                    meetings
+                {% endif %}
+            {% else %}
+                Historical comparison
+            {% endif %}
+        </span>
+
+    </div>
+
+
+    {% if h2h.available %}
+
+        <!-- ============================================================
+        SECTION 05A: SERIES SUMMARY
+        ============================================================ -->
+
+        <div class="h2h-series-summary">
+
+            <div class="h2h-team-summary">
+
+                {% if h2h.team1_logo %}
+                    <img
+                        src="{{ h2h.team1_logo }}"
+                        alt="{{ h2h.team1_name }} crest"
+                        class="h2h-team-logo"
+                    >
+                {% endif %}
+
+                <span class="h2h-team-name">
+                    {{ h2h.team1_name }}
+                </span>
+
+                <strong class="h2h-win-total">
+                    {{ h2h.team1_wins }}
+                </strong>
+
+                <span class="h2h-summary-label">
+                    {% if h2h.team1_wins == 1 %}
+                        Win
+                    {% else %}
+                        Wins
+                    {% endif %}
+                    ·
+                    {{
+                        "%.0f"|format(
+                            h2h.team1_win_percentage
+                        )
+                    }}%
+                </span>
+
+            </div>
+
+
+            <div class="h2h-draw-summary">
+
+                <span class="h2h-summary-label">
+                    Draws
+                </span>
+
+                <strong class="h2h-draw-total">
+                    {{ h2h.draws }}
+                </strong>
+
+                <span class="h2h-summary-label">
+                    {{
+                        "%.0f"|format(
+                            h2h.draw_percentage
+                        )
+                    }}%
+                </span>
+
+            </div>
+
+
+            <div class="h2h-team-summary">
+
+                {% if h2h.team2_logo %}
+                    <img
+                        src="{{ h2h.team2_logo }}"
+                        alt="{{ h2h.team2_name }} crest"
+                        class="h2h-team-logo"
+                    >
+                {% endif %}
+
+                <span class="h2h-team-name">
+                    {{ h2h.team2_name }}
+                </span>
+
+                <strong class="h2h-win-total">
+                    {{ h2h.team2_wins }}
+                </strong>
+
+                <span class="h2h-summary-label">
+                    {% if h2h.team2_wins == 1 %}
+                        Win
+                    {% else %}
+                        Wins
+                    {% endif %}
+                    ·
+                    {{
+                        "%.0f"|format(
+                            h2h.team2_win_percentage
+                        )
+                    }}%
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================================================
+        SECTION 05B: SERIES DETAILS
+        ============================================================ -->
+
+        <div class="h2h-detail-grid">
+
+            <div class="h2h-detail-box">
+
+                <span>
+                    {{ h2h.team1_name }} Goals
+                </span>
+
+                <strong>
+                    {{ h2h.team1_goals }}
+                </strong>
+
+            </div>
+
+
+            <div class="h2h-detail-box h2h-series-leader-box">
+
+                <span>
+                    Series Read
+                </span>
+
+                <strong>
+                    {{ h2h.series_leader }}
+                </strong>
+
+                <small>
+                    {{ h2h.series_summary }}
+                </small>
+
+            </div>
+
+
+            <div class="h2h-detail-box">
+
+                <span>
+                    {{ h2h.team2_name }} Goals
+                </span>
+
+                <strong>
+                    {{ h2h.team2_goals }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================================================
+        SECTION 05C: RECENT MEETINGS HEADER
+        ============================================================ -->
+
+        <div class="h2h-meetings-header">
+
+            <div>
+                <h3>Recent Meetings</h3>
+
+                <p class="small-description">
+                    Scores are displayed in home-team to away-team order.
+                </p>
+            </div>
+
+            <span class="info-chip">
+                {{ h2h.total_goals }} combined goals
+            </span>
+
+        </div>
+
+
+        <!-- ============================================================
+        SECTION 05D: RECENT MEETING LIST
+        ============================================================ -->
+
+        <div class="h2h-meeting-list">
+
+            {% for meeting in h2h.recent_meetings %}
+
+                <article class="h2h-meeting-row">
+
+                    <div class="h2h-meeting-meta">
+
+                        <strong>
+                            {{ meeting.date }}
+                        </strong>
+
+                        <span>
+                            {{
+                                meeting.competition
+                                or "International"
+                            }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="h2h-meeting-match">
+
+                        <!-- HOME TEAM: LEFT SIDE -->
+
+                        <div
+                            class="
+                                h2h-meeting-team
+                                h2h-meeting-team-home
+                            "
+                        >
+
+                            <small class="h2h-home-away-label">
+                                Home
+                            </small>
+
+                            <div class="h2h-meeting-team-content">
+
+                                <span>
+                                    {{ meeting.home_name }}
+                                </span>
+
+                                {% if meeting.home_logo %}
+                                    <img
+                                        src="{{ meeting.home_logo }}"
+                                        alt="{{ meeting.home_name }} crest"
+                                        class="h2h-meeting-logo"
+                                    >
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- SCORE: HOME GOALS FIRST, AWAY GOALS SECOND -->
+
+                        <div class="h2h-meeting-score">
+
+                            <strong>
+                                {{ meeting.score }}
+                            </strong>
+
+                            <span class="h2h-score-order-label">
+                                Home – Away
+                            </span>
+
+                            {% if meeting.penalty_score %}
+                                <small>
+                                    {{ meeting.penalty_score }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- AWAY TEAM: RIGHT SIDE -->
+
+                        <div
+                            class="
+                                h2h-meeting-team
+                                h2h-meeting-team-away
+                            "
+                        >
+
+                            <small class="h2h-home-away-label">
+                                Away
+                            </small>
+
+                            <div class="h2h-meeting-team-content">
+
+                                {% if meeting.away_logo %}
+                                    <img
+                                        src="{{ meeting.away_logo }}"
+                                        alt="{{ meeting.away_name }} crest"
+                                        class="h2h-meeting-logo"
+                                    >
+                                {% endif %}
+
+                                <span>
+                                    {{ meeting.away_name }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- ============================================================
+        SECTION 05E: DATA SOURCE
+        ============================================================ -->
+
+        <div class="h2h-card-footer">
+
+            <span>
+                Data source:
+                {{ h2h.data_source|default("API-Football") }}
+            </span>
+
+            {% if h2h.updated_at %}
+                <span>
+                    Updated:
+                    {{ h2h.updated_at }}
+                </span>
+            {% endif %}
+
+        </div>
+
+
+    {% else %}
+
+        <!-- ============================================================
+        SECTION 05F: UNAVAILABLE STATE
+        ============================================================ -->
+
+        <div class="h2h-unavailable">
+
+            <h3>
+                Head-to-head data is currently unavailable
+            </h3>
+
+            <p>
+                No cached head-to-head data is available.
+                Press Refresh Match Insights to load it.
+                Existing predictions and live analysis
+                will continue to work.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+        <!-- ================================================================
+SECTION 06: RECENT FORM AND FIFA RANKINGS
+================================================================ -->
+
+<section
+    class="card"
+    id="team-comparison"
+>
+
+    <div class="section-heading">
+
+        <div>
+            <p class="section-kicker">
+                Team Comparison
+            </p>
+
+            <h2>Recent Form & FIFA Rankings</h2>
+        </div>
+
+        <span class="info-chip">
+            Last 5 matches
+        </span>
+
+    </div>
+
+
+    <div class="comparison-dashboard-grid">
+
+        <article class="comparison-team-card">
+
+            <div class="comparison-team-header">
+
+                <div>
+                    <span class="comparison-team-label">
+                        Team 1
+                    </span>
+
+                    <h3>
+                        {{ team1.name }}
+                    </h3>
+                </div>
+
+                {% if recent_form_team1.logo %}
+                    <img
+                        src="{{ recent_form_team1.logo }}"
+                        alt="{{ team1.name }} crest"
+                        class="comparison-team-logo"
+                    >
+                {% elif team1_logo %}
+                    <img
+                        src="{{ team1_logo }}"
+                        alt="{{ team1.name }} crest"
+                        class="comparison-team-logo"
+                    >
+                {% endif %}
+
+            </div>
+
+
+            <div class="ranking-summary">
+
+                <div class="ranking-position">
+                    <span>
+                        FIFA Rank
+                    </span>
+
+                    <strong>
+                        {% if team1.fifa_rank is not none %}
+                            #{{ team1.fifa_rank }}
+                        {% else %}
+                            Not ranked
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="ranking-points">
+                    <span>
+                        Ranking Points
+                    </span>
+
+                    <strong>
+                        {% if team1.fifa_points is not none %}
+                            {{
+                                "%.2f"|format(
+                                    team1.fifa_points
+                                )
+                            }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            {% if team1.ranking_date %}
+                <p class="ranking-date">
+                    Ranking updated:
+                    {{ team1.ranking_date }}
+                </p>
+            {% endif %}
+
+
+            {% if recent_form_team1.available %}
+
+                <div class="form-sequence">
+
+                    {% for result in recent_form_team1.sequence %}
+
+                        <span
+                            class="
+                                form-result
+                                {% if result == 'W' %}
+                                    form-win
+                                {% elif result == 'D' %}
+                                    form-draw
+                                {% else %}
+                                    form-loss
+                                {% endif %}
+                            "
+                        >
+                            {{ result }}
+                        </span>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="form-stat-grid">
+
+                    <div>
+                        <span>Record</span>
+
+                        <strong>
+                            {{ recent_form_team1.wins }}W
+                            {{ recent_form_team1.draws }}D
+                            {{ recent_form_team1.losses }}L
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Form Points</span>
+
+                        <strong>
+                            {{ recent_form_team1.form_points }}/15
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Goals For</span>
+
+                        <strong>
+                            {{ recent_form_team1.goals_for }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Goals Against</span>
+
+                        <strong>
+                            {{ recent_form_team1.goals_against }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="recent-form-match-list">
+
+                    {% for match in recent_form_team1.matches %}
+
+                        <div class="recent-form-match">
+
+                            <span class="recent-form-date">
+                                {{ match.date }}
+                            </span>
+
+                            <strong>
+                                {{ match.result }}
+                            </strong>
+
+                            <span>
+                                {{ match.opponent }}
+                            </span>
+
+                            <span>
+                                {{ match.score }}
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="empty-state">
+                    Recent-form data is currently unavailable.
+                </p>
+
+            {% endif %}
+
+        </article>
+
+
+        <article class="comparison-team-card">
+
+            <div class="comparison-team-header">
+
+                <div>
+                    <span class="comparison-team-label">
+                        Team 2
+                    </span>
+
+                    <h3>
+                        {{ team2.name }}
+                    </h3>
+                </div>
+
+                {% if recent_form_team2.logo %}
+                    <img
+                        src="{{ recent_form_team2.logo }}"
+                        alt="{{ team2.name }} crest"
+                        class="comparison-team-logo"
+                    >
+                {% elif team2_logo %}
+                    <img
+                        src="{{ team2_logo }}"
+                        alt="{{ team2.name }} crest"
+                        class="comparison-team-logo"
+                    >
+                {% endif %}
+
+            </div>
+
+
+            <div class="ranking-summary">
+
+                <div class="ranking-position">
+                    <span>
+                        FIFA Rank
+                    </span>
+
+                    <strong>
+                        {% if team2.fifa_rank is not none %}
+                            #{{ team2.fifa_rank }}
+                        {% else %}
+                            Not ranked
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="ranking-points">
+                    <span>
+                        Ranking Points
+                    </span>
+
+                    <strong>
+                        {% if team2.fifa_points is not none %}
+                            {{
+                                "%.2f"|format(
+                                    team2.fifa_points
+                                )
+                            }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            {% if team2.ranking_date %}
+                <p class="ranking-date">
+                    Ranking updated:
+                    {{ team2.ranking_date }}
+                </p>
+            {% endif %}
+
+
+            {% if recent_form_team2.available %}
+
+                <div class="form-sequence">
+
+                    {% for result in recent_form_team2.sequence %}
+
+                        <span
+                            class="
+                                form-result
+                                {% if result == 'W' %}
+                                    form-win
+                                {% elif result == 'D' %}
+                                    form-draw
+                                {% else %}
+                                    form-loss
+                                {% endif %}
+                            "
+                        >
+                            {{ result }}
+                        </span>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <div class="form-stat-grid">
+
+                    <div>
+                        <span>Record</span>
+
+                        <strong>
+                            {{ recent_form_team2.wins }}W
+                            {{ recent_form_team2.draws }}D
+                            {{ recent_form_team2.losses }}L
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Form Points</span>
+
+                        <strong>
+                            {{ recent_form_team2.form_points }}/15
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Goals For</span>
+
+                        <strong>
+                            {{ recent_form_team2.goals_for }}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Goals Against</span>
+
+                        <strong>
+                            {{ recent_form_team2.goals_against }}
+                        </strong>
+                    </div>
+
+                </div>
+
+
+                <div class="recent-form-match-list">
+
+                    {% for match in recent_form_team2.matches %}
+
+                        <div class="recent-form-match">
+
+                            <span class="recent-form-date">
+                                {{ match.date }}
+                            </span>
+
+                            <strong>
+                                {{ match.result }}
+                            </strong>
+
+                            <span>
+                                {{ match.opponent }}
+                            </span>
+
+                            <span>
+                                {{ match.score }}
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="empty-state">
+                    Recent-form data is currently unavailable.
+                </p>
+
+            {% endif %}
+
+        </article>
+
+    </div>
+
+</section>
+
+
+        <!-- ================================================================
+        SECTION 07: LIVE SCOREBOARD
+        ================================================================ -->
+
+        <section
+            class="card live-score-card"
+            id="live-score"
+        >
+
+            <p class="section-kicker">
+                Live Match
+            </p>
+
+            <div class="scoreboard">
+
+                <div class="score-team score-team-left">
+
+                    <div class="score-team-identity">
+
+                        {% if team1_logo %}
+                            <img
+                                src="{{ team1_logo }}"
+                                alt="{{ team1.name }} team flag"
+                                class="team-flag"
+                            >
+                        {% endif %}
+
+                        <span class="score-team-name">
+                            {{ team1.name }}
+                        </span>
+
+                    </div>
+
+                    <strong class="score-number">
+                        {{ team1.goals }}
+                    </strong>
+
+                </div>
+
+
+                <div class="score-center">
+
+                    {% if match_status_short == "HT" %}
+
+                        <span class="live-badge status-halftime">
+                            HT
+                        </span>
+
+                    {% elif match_status_short == "FT" %}
+
+                        <span class="live-badge status-finished">
+                            FT
+                        </span>
+
+                    {% elif match_status_short == "AET" %}
+
+                        <span class="live-badge status-finished">
+                            AET
+                        </span>
+
+                    {% elif match_status_short == "PEN" %}
+
+                        <span class="live-badge status-penalties">
+                            PEN
+                        </span>
+
+                    {% elif match_status_short == "BT" %}
+
+                        <span class="live-badge status-halftime">
+                            ET BREAK
+                        </span>
+
+                    {% elif match_status_short == "ET" %}
+
+                        <span class="live-badge status-extra-time">
+                            ET
+                        </span>
+
+                    {% elif match_status_short == "PST" %}
+
+                        <span class="live-badge status-unavailable">
+                            POSTPONED
+                        </span>
+
+                    {% elif match_status_short == "CANC" %}
+
+                        <span class="live-badge status-unavailable">
+                            CANCELLED
+                        </span>
+
+                    {% elif match_status_short == "ABD" %}
+
+                        <span class="live-badge status-unavailable">
+                            ABANDONED
+                        </span>
+
+                    {% elif match_status_short == "SUSP" %}
+
+                        <span class="live-badge status-unavailable">
+                            SUSPENDED
+                        </span>
+
+                    {% elif match_status_short == "INT" %}
+
+                        <span class="live-badge status-unavailable">
+                            INTERRUPTED
+                        </span>
+
+                    {% elif data_source == "real" %}
+
+                        <span class="live-badge">
+                            LIVE
+                        </span>
+
+                    {% elif data_source == "cached" %}
+
+                        <span class="live-badge status-cached">
+                            LAST LIVE UPDATE
+                        </span>
+
+                    {% elif data_source == "unavailable" %}
+
+                        <span class="live-badge status-unavailable">
+                            NO LIVE DATA
+                        </span>
+
+                    {% else %}
+
+                        <span class="live-badge status-not-started">
+                            PRE-MATCH
+                        </span>
+
+                    {% endif %}
+
+
+                    <strong class="match-minute">
+
+                        {% if match_status_short == "HT" %}
+
+                            Halftime
+
+                        {% elif match_status_short == "FT" %}
+
+                            Full Time
+
+                        {% elif match_status_short == "AET" %}
+
+                            After Extra Time
+
+                        {% elif match_status_short == "PEN" %}
+
+                            Penalty Shootout
+
+                        {% elif match_status_short == "BT" %}
+
+                            Extra-Time Break
+
+                        {% elif match_status_short in [
+                            "PST",
+                            "CANC",
+                            "ABD",
+                            "SUSP",
+                            "INT"
+                        ] %}
+
+                            {{
+                                match_status_long
+                                or "Match Unavailable"
+                            }}
+
+                        {% elif data_source == "unavailable" %}
+
+                            Pre-Match Analysis
+
+                        {% elif match_status_short == "NS" %}
+
+                            {{
+                                match_status_long
+                                or "Match Not Started"
+                            }}
+
+                        {% elif match_extra_minute > 0 %}
+
+                            {{ match_minute }}+{{ match_extra_minute }}'
+
+                        {% elif data_source in ["real", "cached"] %}
+
+                            {{ match_minute }}'
+
+                        {% else %}
+
+                            Pre-Match Analysis
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="score-team score-team-right">
+
+                    <strong class="score-number">
+                        {{ team2.goals }}
+                    </strong>
+
+                    <div
+                        class="
+                            score-team-identity
+                            score-team-identity-right
+                        "
+                    >
+
+                        <span class="score-team-name">
+                            {{ team2.name }}
+                        </span>
+
+                        {% if team2_logo %}
+                            <img
+                                src="{{ team2_logo }}"
+                                alt="{{ team2.name }} team flag"
+                                class="team-flag"
+                            >
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+        <!-- ================================================================
+        SECTION 08: WIN PROBABILITY
+        ================================================================ -->
+
+        <section class="card" id="win-probability">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Prediction
+                    </p>
+
+                    <h2>Win Probability</h2>
+                </div>
+
+            </div>
+
+            <div class="probability-summary">
+
+                <div>
+                    <span>
+                        {{ team1.name }}
+                    </span>
+
+                    <strong>
+                        {{ "%.1f"|format(
+                            team1_probability
+                        ) }}%
+                    </strong>
+                </div>
+
+                <div class="draw-summary">
+                    <span>
+                        Draw
+                    </span>
+
+                    <strong>
+                        {{ "%.1f"|format(
+                            draw_probability
+                        ) }}%
+                    </strong>
+                </div>
+
+                <div>
+                    <span>
+                        {{ team2.name }}
+                    </span>
+
+                    <strong>
+                        {{ "%.1f"|format(
+                            team2_probability
+                        ) }}%
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="stacked-probability-bar">
+
+                <div
+                    class="stack-segment team1-bar"
+                    style="width: {{ team1_probability }}%;"
+                    title="{{ team1.name }} {{ team1_probability }}%"
+                ></div>
+
+                <div
+                    class="stack-segment draw-bar"
+                    style="width: {{ draw_probability }}%;"
+                    title="Draw {{ draw_probability }}%"
+                ></div>
+
+                <div
+                    class="stack-segment team2-bar"
+                    style="width: {{ team2_probability }}%;"
+                    title="{{ team2.name }} {{ team2_probability }}%"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 09: LIVE MOMENTUM
+        ================================================================ -->
+
+        <section class="card" id="live-momentum">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Current Match Flow
+                    </p>
+
+                    <h2>Live Momentum</h2>
+                </div>
+
+                <span class="info-chip">
+                    Current pressure, not final outcome
+                </span>
+
+            </div>
+
+            <div class="two-team-values">
+
+                <span>
+                    {{ team1.name }}
+
+                    <strong>
+                        {{ "%.1f"|format(
+                            team1_live_momentum
+                        ) }}%
+                    </strong>
+                </span>
+
+                <span>
+                    {{ team2.name }}
+
+                    <strong>
+                        {{ "%.1f"|format(
+                            team2_live_momentum
+                        ) }}%
+                    </strong>
+                </span>
+
+            </div>
+
+            <div class="momentum-bar">
+
+                <div
+                    class="momentum-team1"
+                    style="width: {{ team1_live_momentum }}%;"
+                ></div>
+
+                <div
+                    class="momentum-team2"
+                    style="width: {{ team2_live_momentum }}%;"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 10: ATTACK PRESSURE
+        ================================================================ -->
+
+        <section class="card" id="attack-pressure">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Attacking Threat
+                    </p>
+
+                    <h2>Attack Pressure</h2>
+                </div>
+
+            </div>
+
+            <div class="pressure-comparison">
+
+                <div class="pressure-team">
+
+                    <span>
+                        {{ team1.name }}
+                    </span>
+
+                    <strong class="pressure-score">
+                        {{ "%.1f"|format(
+                            team1_attack_pressure
+                        ) }}
+                    </strong>
+
+                    <small>
+                        {{ team1_calculated_dangerous_attacks }}
+                        calculated dangerous attacks
+                    </small>
+
+                </div>
+
+                <div class="pressure-divider">
+                    vs
+                </div>
+
+                <div class="pressure-team pressure-team-right">
+
+                    <span>
+                        {{ team2.name }}
+                    </span>
+
+                    <strong class="pressure-score">
+                        {{ "%.1f"|format(
+                            team2_attack_pressure
+                        ) }}
+                    </strong>
+
+                    <small>
+                        {{ team2_calculated_dangerous_attacks }}
+                        calculated dangerous attacks
+                    </small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 11: MATCH STATISTICS
+        ================================================================ -->
+
+        <section class="card" id="match-statistics">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Live Data
+                    </p>
+
+                    <h2>Match Statistics</h2>
+                </div>
+
+            </div>
+
+            <div class="stats-header">
+
+                <strong>
+                    {{ team1.name }}
+                </strong>
+
+                <span>
+                    Statistic
+                </span>
+
+                <strong>
+                    {{ team2.name }}
+                </strong>
+
+            </div>
+
+            <div class="comparison-stats">
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        {{ team1.possession }}%
+                    </strong>
+
+                    <span>
+                        Possession
+                    </span>
+
+                    <strong>
+                        {{ team2.possession }}%
+                    </strong>
+
+                </div>
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        {{ team1_total_shots }}
+                    </strong>
+
+                    <span>
+                        Shots
+                    </span>
+
+                    <strong>
+                        {{ team2_total_shots }}
+                    </strong>
+
+                </div>
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        {{ team1_shots_on_target }}
+                    </strong>
+
+                    <span>
+                        Shots on Target
+                    </span>
+
+                    <strong>
+                        {{ team2_shots_on_target }}
+                    </strong>
+
+                </div>
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        {{ team1_big_chances }}
+                    </strong>
+
+                    <span>
+                        Big Chances
+                    </span>
+
+                    <strong>
+                        {{ team2_big_chances }}
+                    </strong>
+
+                </div>
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        {{ team1_blocked_shots }}
+                    </strong>
+
+                    <span>
+                        Blocked Shots
+                    </span>
+
+                    <strong>
+                        {{ team2_blocked_shots }}
+                    </strong>
+
+                </div>
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        {{ team1_saves }}
+                    </strong>
+
+                    <span>
+                        Saves
+                    </span>
+
+                    <strong>
+                        {{ team2_saves }}
+                    </strong>
+
+                </div>
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        {{ team1_corners }}
+                    </strong>
+
+                    <span>
+                        Corners
+                    </span>
+
+                    <strong>
+                        {{ team2_corners }}
+                    </strong>
+
+                </div>
+
+                <div class="comparison-stat-row">
+
+                    <strong>
+                        <span class="yellow-card-marker"></span>
+
+                        {{ team1_yellow_cards }}
+
+                        &nbsp;
+
+                        <span class="red-card-marker"></span>
+
+                        {{ team1_red_cards }}
+                    </strong>
+
+                    <span>
+                        Cards
+                    </span>
+
+                    <strong>
+                        <span class="yellow-card-marker"></span>
+
+                        {{ team2_yellow_cards }}
+
+                        &nbsp;
+
+                        <span class="red-card-marker"></span>
+
+                        {{ team2_red_cards }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 12: EVENT TIMELINE
+        ================================================================ -->
+
+        <section class="card" id="event-timeline">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Match Story
+                    </p>
+
+                    <h2>Event Timeline</h2>
+                </div>
+
+            </div>
+
+            {% if event_timeline %}
+
+                <div class="event-list">
+
+                    {% for event in event_timeline %}
+
+                        <article class="event-entry">
+
+                            <div class="event-minute">
+                                {{ event.minute }}'
+                            </div>
+
+                            <div class="event-marker"></div>
+
+                            <div class="event-content">
+
+                                <div class="event-top-line">
+
+                                    <strong>
+                                        {{ event.type }}
+                                    </strong>
+
+                                    <span>
+                                        {{ event.team }}
+                                    </span>
+
+                                </div>
+
+                                {% if event.detail %}
+
+                                    <p>
+                                        {{ event.detail }}
+                                    </p>
+
+                                {% endif %}
+
+                            </div>
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="empty-state">
+                    No match events are available yet.
+                    Use the live-feed button or load one
+                    of the demo matchups.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 13: MOST LIKELY SCORELINES
+        ================================================================ -->
+
+        <section class="card" id="most-likely-scores">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Score Model
+                    </p>
+
+                    <h2>Most Likely Scores</h2>
+                </div>
+
+            </div>
+
+            <div class="scoreline-list">
+
+                {% for scoreline in top_scorelines %}
+
+                    <div class="scoreline-row">
+
+                        <span>
+                            {{ team1.name }}
+
+                            {{ scoreline.team1_goals }}
+
+                            -
+
+                            {{ scoreline.team2_goals }}
+
+                            {{ team2.name }}
+                        </span>
+
+                        <strong>
+                            {{ "%.2f"|format(
+                                scoreline.probability * 100
+                            ) }}%
+                        </strong>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 14: POISSON EXPECTED GOALS
+        ================================================================ -->
+
+        <section class="card" id="poisson-expected-goals">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Poisson Model
+                    </p>
+
+                    <h2>Poisson Expected Goals</h2>
+                </div>
+
+            </div>
+
+            <div class="expected-goals-grid">
+
+                <div class="expected-goals-team">
+
+                    <span>
+                        {{ team1.name }}
+                    </span>
+
+                    <strong>
+                        {{ "%.2f"|format(
+                            team1_expected_goals
+                        ) }}
+                    </strong>
+
+                    <small>
+                        Expected goals remaining
+                    </small>
+
+                </div>
+
+                <div class="expected-goals-team">
+
+                    <span>
+                        {{ team2.name }}
+                    </span>
+
+                    <strong>
+                        {{ "%.2f"|format(
+                            team2_expected_goals
+                        ) }}
+                    </strong>
+
+                    <small>
+                        Expected goals remaining
+                    </small>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 15: PREDICTION REASONS
+        ================================================================ -->
+
+        <section class="card" id="prediction-reasons">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Model Explanation
+                    </p>
+
+                    <h2>Why This Prediction?</h2>
+                </div>
+
+            </div>
+
+            <ul class="reason-list">
+
+                {% for reason in reasons %}
+
+                    <li>
+                        {{ reason }}
+                    </li>
+
+                {% endfor %}
+
+            </ul>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 16: CONFIDENCE AND MATCH DIFFICULTY
+        ================================================================ -->
+
+        <section
+            class="analytics-grid"
+            id="supporting-analytics"
+        >
+
+            <div class="card compact-card">
+
+                <p class="section-kicker">
+                    Confidence
+                </p>
+
+                <h2>
+                    Prediction Confidence
+                </h2>
+
+                <div class="confidence-header">
+
+                    <span>
+                        {{ confidence_level }}
+                    </span>
+
+                    <span>
+                        {{ "%.1f"|format(
+                            confidence_score
+                        ) }}%
+                    </span>
+
+                </div>
+
+                <div class="progress-track">
+
+                    <div
+                        class="progress-fill {{ confidence_class }}"
+                        style="width: {{ confidence_score }}%;"
+                    ></div>
+
+                </div>
+
+                <p class="small-description">
+                    Measures how far the leading outcome
+                    is ahead of the second-most likely outcome.
+                </p>
+
+            </div>
+
+
+            <div class="card compact-card">
+
+                <p class="section-kicker">
+                    Competitiveness
+                </p>
+
+                <h2>
+                    Match Difficulty
+                </h2>
+
+                <div class="difficulty-stars">
+
+                    {% for number in range(1, 6) %}
+
+                        {% if number <= difficulty_stars %}
+
+                            <span class="active-star">
+                                ★
+                            </span>
+
+                        {% else %}
+
+                            <span class="inactive-star">
+                                ★
+                            </span>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+                <p class="difficulty-label">
+                    {{ difficulty_label }}
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 17: MOST LIKELY OUTCOME
+        ================================================================ -->
+
+        <section
+            class="winner"
+            id="most-likely-outcome"
+        >
+
+            <p class="winner-heading">
+                Most Likely Outcome
+            </p>
+
+            <p class="winner-result">
+
+                {{ predicted_outcome_label }}
+
+                —
+
+                {{ "%.2f"|format(
+                    predicted_outcome_probability
+                ) }}%
+
+            </p>
+
+            <p>
+                Most likely score:
+
+                {{ team1.name }}
+
+                {{ most_likely_score[0] }}
+
+                -
+
+                {{ most_likely_score[1] }}
+
+                {{ team2.name }}
+            </p>
+
+            <div class="advance-grid">
+
+                <span>
+                    {{ team1.name }} advance:
+
+                    <strong>
+                        {{ "%.1f"|format(
+                            team1_advance_probability
+                        ) }}%
+                    </strong>
+                </span>
+
+                <span>
+                    {{ team2.name }} advance:
+
+                    <strong>
+                        {{ "%.1f"|format(
+                            team2_advance_probability
+                        ) }}%
+                    </strong>
+                </span>
+
+            </div>
+
+        </section>
+        <!-- ================================================================
+        SECTION 18: MANUAL LIVE MATCH CONTROLS
+        ================================================================ -->
+
+        <section class="card" id="manual-live-data">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Manual Controls
+                    </p>
+
+                    <h2>
+                        Live Match Data
+                    </h2>
+                </div>
+
+                <span class="info-chip">
+                    Used when live API data is unavailable
+                </span>
+
+            </div>
+
+            <label for="match_minute">
+                Match Minute
+            </label>
+
+            <input
+                id="match_minute"
+                type="number"
+                name="match_minute"
+                min="0"
+                max="120"
+                value="{{ match_minute }}"
+            >
+
+            <div class="grid manual-team-grid">
+
+                <div class="manual-team-column">
+
+                    <h3>
+                        {{ team1.name }}
+                    </h3>
+
+                    <label for="team1_goals">
+                        Goals
+                    </label>
+
+                    <input
+                        id="team1_goals"
+                        type="number"
+                        name="team1_goals"
+                        min="0"
+                        value="{{ team1.goals }}"
+                    >
+
+                    <label for="team1_total_shots">
+                        Total Shots
+                    </label>
+
+                    <input
+                        id="team1_total_shots"
+                        type="number"
+                        name="team1_total_shots"
+                        min="0"
+                        value="{{ team1.shots }}"
+                    >
+
+                    <label for="team1_shots">
+                        Shots on Target
+                    </label>
+
+                    <input
+                        id="team1_shots"
+                        type="number"
+                        name="team1_shots"
+                        min="0"
+                        value="{{ team1.shots_on_target }}"
+                    >
+
+                    <label for="team1_big_chances">
+                        Big Chances
+                    </label>
+
+                    <input
+                        id="team1_big_chances"
+                        type="number"
+                        name="team1_big_chances"
+                        min="0"
+                        value="{{ team1.big_chances }}"
+                    >
+
+                    <label for="team1_defender_blocks">
+                        Blocked Shots
+                    </label>
+
+                    <input
+                        id="team1_defender_blocks"
+                        type="number"
+                        name="team1_defender_blocks"
+                        min="0"
+                        value="{{ team1.defender_blocks }}"
+                    >
+
+                    <label for="team1_goalkeeper_saves">
+                        Saves
+                    </label>
+
+                    <input
+                        id="team1_goalkeeper_saves"
+                        type="number"
+                        name="team1_goalkeeper_saves"
+                        min="0"
+                        value="{{ team1.goalkeeper_saves }}"
+                    >
+
+                    <label for="team1_corners">
+                        Corners
+                    </label>
+
+                    <input
+                        id="team1_corners"
+                        type="number"
+                        name="team1_corners"
+                        min="0"
+                        value="{{ team1.corners }}"
+                    >
+
+                    <label for="team1_yellow_cards">
+                        Yellow Cards
+                    </label>
+
+                    <input
+                        id="team1_yellow_cards"
+                        type="number"
+                        name="team1_yellow_cards"
+                        min="0"
+                        value="{{ team1.yellow_cards }}"
+                    >
+
+                    <label for="team1_red_cards">
+                        Red Cards
+                    </label>
+
+                    <input
+                        id="team1_red_cards"
+                        type="number"
+                        name="team1_red_cards"
+                        min="0"
+                        value="{{ team1.red_cards }}"
+                    >
+
+                    <label class="checkbox">
+
+                        <input
+                            type="checkbox"
+                            name="team1_bad_star"
+                        >
+
+                        Star player bad game
+
+                    </label>
+
+                </div>
+
+
+                <div class="manual-team-column">
+
+                    <h3>
+                        {{ team2.name }}
+                    </h3>
+
+                    <label for="team2_goals">
+                        Goals
+                    </label>
+
+                    <input
+                        id="team2_goals"
+                        type="number"
+                        name="team2_goals"
+                        min="0"
+                        value="{{ team2.goals }}"
+                    >
+
+                    <label for="team2_total_shots">
+                        Total Shots
+                    </label>
+
+                    <input
+                        id="team2_total_shots"
+                        type="number"
+                        name="team2_total_shots"
+                        min="0"
+                        value="{{ team2.shots }}"
+                    >
+
+                    <label for="team2_shots">
+                        Shots on Target
+                    </label>
+
+                    <input
+                        id="team2_shots"
+                        type="number"
+                        name="team2_shots"
+                        min="0"
+                        value="{{ team2.shots_on_target }}"
+                    >
+
+                    <label for="team2_big_chances">
+                        Big Chances
+                    </label>
+
+                    <input
+                        id="team2_big_chances"
+                        type="number"
+                        name="team2_big_chances"
+                        min="0"
+                        value="{{ team2.big_chances }}"
+                    >
+
+                    <label for="team2_defender_blocks">
+                        Blocked Shots
+                    </label>
+
+                    <input
+                        id="team2_defender_blocks"
+                        type="number"
+                        name="team2_defender_blocks"
+                        min="0"
+                        value="{{ team2.defender_blocks }}"
+                    >
+
+                    <label for="team2_goalkeeper_saves">
+                        Saves
+                    </label>
+
+                    <input
+                        id="team2_goalkeeper_saves"
+                        type="number"
+                        name="team2_goalkeeper_saves"
+                        min="0"
+                        value="{{ team2.goalkeeper_saves }}"
+                    >
+
+                    <label for="team2_corners">
+                        Corners
+                    </label>
+
+                    <input
+                        id="team2_corners"
+                        type="number"
+                        name="team2_corners"
+                        min="0"
+                        value="{{ team2.corners }}"
+                    >
+
+                    <label for="team2_yellow_cards">
+                        Yellow Cards
+                    </label>
+
+                    <input
+                        id="team2_yellow_cards"
+                        type="number"
+                        name="team2_yellow_cards"
+                        min="0"
+                        value="{{ team2.yellow_cards }}"
+                    >
+
+                    <label for="team2_red_cards">
+                        Red Cards
+                    </label>
+
+                    <input
+                        id="team2_red_cards"
+                        type="number"
+                        name="team2_red_cards"
+                        min="0"
+                        value="{{ team2.red_cards }}"
+                    >
+
+                    <label class="checkbox">
+
+                        <input
+                            type="checkbox"
+                            name="team2_bad_star"
+                        >
+
+                        Star player bad game
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <label for="team1_possession">
+                {{ team1.name }} Possession %
+            </label>
+
+            <input
+                id="team1_possession"
+                type="number"
+                name="team1_possession"
+                min="0"
+                max="100"
+                value="{{ team1.possession }}"
+            >
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 19: MONTE CARLO SETTINGS
+        ================================================================ -->
+
+        <div class="simulation-control">
+
+            <label for="simulation_count">
+                Monte Carlo simulations
+            </label>
+
+            <select
+                id="simulation_count"
+                name="simulation_count"
+            >
+
+                <option value="10000" selected>
+                    10,000 runs
+                </option>
+
+                <option value="25000">
+                    25,000 runs
+                </option>
+
+                <option value="50000">
+                    50,000 runs
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ================================================================
+SECTION 20: ACTION BUTTONS
+PURPOSE:
+Runs manual updates, live-feed updates, cached insight refreshes,
+match resets, and tournament simulations.
+================================================================ -->
+
+<div class="button-grid">
+
+    <button
+        type="submit"
+        name="action"
+        value="manual"
+    >
+        Update Prediction
+    </button>
+
+    <button
+        type="submit"
+        name="action"
+        value="live_feed"
+        class="secondary"
+    >
+        Update From Live Feed
+    </button>
+
+    <button
+        type="submit"
+        name="action"
+        value="refresh_insights"
+        class="insights-button"
+    >
+        Refresh Match Insights
+    </button>
+
+    <button
+        type="submit"
+        name="action"
+        value="reset_timeline"
+        class="danger-button"
+    >
+        Reset Match Stats
+    </button>
+
+    <button
+        type="submit"
+        name="action"
+        value="simulate_tournament"
+        class="tournament-button"
+    >
+        Simulate Tournament
+    </button>
+
+</div>
+
+
+        <!-- ================================================================
+        SECTION 21: xG AND POSSESSION CHARTS
+        ================================================================ -->
+
+        <section class="card" id="match-charts">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Match Intelligence
+                    </p>
+
+                    <h2>
+                        xG & Possession Trends
+                    </h2>
+                </div>
+
+                <span class="info-chip">
+                    Snapshots by match minute
+                </span>
+
+            </div>
+
+            {% if match_chart_timeline %}
+
+                <div class="chart-grid">
+
+                    <div class="chart-panel">
+
+                        <h3>
+                            Projected xG
+                        </h3>
+
+                        <canvas
+                            id="xgChart"
+                            height="250"
+                        ></canvas>
+
+                    </div>
+
+                    <div class="chart-panel">
+
+                        <h3>
+                            Possession
+                        </h3>
+
+                        <canvas
+                            id="possessionChart"
+                            height="250"
+                        ></canvas>
+
+                    </div>
+
+                </div>
+
+                <script
+                    id="match-chart-data"
+                    type="application/json"
+                >
+                    {{ match_chart_timeline|tojson }}
+                </script>
+
+            {% else %}
+
+                <p class="empty-state">
+                    Update the match to begin plotting xG
+                    and possession movement.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+
+        <!-- ================================================================
+        SECTION 22: PROBABILITY HISTORY
+        ================================================================ -->
+
+        <section class="card" id="probability-history">
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Model History
+                    </p>
+
+                    <h2>
+                        Win Probability Timeline
+                    </h2>
+                </div>
+
+            </div>
+
+            {% if probability_timeline %}
+
+                <div class="timeline-list">
+
+                    {% for entry in probability_timeline %}
+
+                        <div class="timeline-entry">
+
+                            <div class="timeline-minute">
+                                {{ entry.minute }}'
+                            </div>
+
+                            <div class="timeline-main">
+
+                                <div class="timeline-type">
+                                    {{ entry.update_type }}
+                                </div>
+
+                                <div class="timeline-content">
+
+                                    <div>
+                                        {{ entry.team1_name }}:
+
+                                        <strong>
+                                            {{ entry.team1_probability }}%
+                                        </strong>
+                                    </div>
+
+                                    <div>
+                                        Draw:
+
+                                        <strong>
+                                            {{ entry.draw_probability }}%
+                                        </strong>
+                                    </div>
+
+                                    <div>
+                                        {{ entry.team2_name }}:
+
+                                        <strong>
+                                            {{ entry.team2_probability }}%
+                                        </strong>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="empty-state">
+                    Update the match to begin recording
+                    probability changes.
+                </p>
+
+            {% endif %}
+
+        </section>
+
+    </form>
+
+
+    <!-- ================================================================
+    SECTION 23: MONTE CARLO TOURNAMENT RESULTS
+    ================================================================ -->
+
+    {% if tournament_results %}
+
+        <section
+            class="card"
+            id="tournament-simulation"
+        >
+
+            <div class="section-heading">
+
+                <div>
+                    <p class="section-kicker">
+                        Monte Carlo Tournament Model
+                    </p>
+
+                    <h2>
+                        Tournament Simulation
+                    </h2>
+                </div>
+
+                <span class="info-chip">
+                    {{ "{:,}".format(
+                        tournament_simulations
+                    ) }}
+                    runs
+                </span>
+
+            </div>
+
+
+            {% if most_common_final %}
+
+                <div class="common-final-box">
+
+                    <span>
+                        Most common final
+                    </span>
+
+                    <strong>
+                        {{ most_common_final.team1 }}
+                        vs
+                        {{ most_common_final.team2 }}
+                    </strong>
+
+                    <small>
+                        {{ most_common_final.probability }}%
+                        of simulations
+                    </small>
+
+                </div>
+
+            {% endif %}
+
+
+            <div class="simulation-table-wrap">
+
+                <table class="simulation-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>Team</th>
+                            <th>FIFA Rank</th>
+                            <th>Semifinal</th>
+                            <th>Final</th>
+                            <th>Champion</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in tournament_results %}
+
+                            <tr>
+
+                                <td>
+                                    <strong>
+                                        {{ row.team }}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    #{{ row.fifa_rank or "—" }}
+                                </td>
+
+                                <td>
+                                    {{ row.semifinal_probability }}%
+                                </td>
+
+                                <td>
+                                    {{ row.final_probability }}%
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        {{ row.champion_probability }}%
+                                    </strong>
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            {% if tournament_champion %}
+
+                <div class="champion-box">
+
+                    <span>
+                        Highest championship probability
+                    </span>
+
+                    <strong>
+                        {{ tournament_champion }}
+                    </strong>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    {% endif %}
+
+</div>
+
+
+<!-- ================================================================
+SECTION 24: xG AND POSSESSION CHART SCRIPT
+================================================================ -->
+
+<script>
+
+(function () {
+
+    const source = document.getElementById(
+        "match-chart-data"
+    );
+
+    if (!source) {
+        return;
+    }
+
+    const rows = JSON.parse(
+        source.textContent || "[]"
+    );
+
+    if (!rows.length) {
+        return;
+    }
+
+
+    function drawLineChart(
+        canvasId,
+        series,
+        maxY,
+        suffix
+    ) {
+
+        const canvas = document.getElementById(
+            canvasId
+        );
+
+        if (!canvas) {
+            return;
+        }
+
+        const ratio = (
+            window.devicePixelRatio || 1
+        );
+
+        const width = (
+            canvas.clientWidth || 420
+        );
+
+        const height = 250;
+
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
+
+        const context = canvas.getContext(
+            "2d"
+        );
+
+        context.scale(
+            ratio,
+            ratio
+        );
+
+        const padding = {
+            left: 42,
+            right: 16,
+            top: 18,
+            bottom: 34
+        };
+
+        const chartWidth = (
+            width
+            - padding.left
+            - padding.right
+        );
+
+        const chartHeight = (
+            height
+            - padding.top
+            - padding.bottom
+        );
+
+        context.font = "12px Arial";
+        context.strokeStyle = "#303640";
+        context.fillStyle = "#aab2bf";
+        context.lineWidth = 1;
+
+
+        for (
+            let markerIndex = 0;
+            markerIndex <= 4;
+            markerIndex += 1
+        ) {
+
+            const yPosition = (
+                padding.top
+                + chartHeight
+                - (
+                    chartHeight
+                    * markerIndex
+                    / 4
+                )
+            );
+
+            context.beginPath();
+
+            context.moveTo(
+                padding.left,
+                yPosition
+            );
+
+            context.lineTo(
+                width - padding.right,
+                yPosition
+            );
+
+            context.stroke();
+
+            const markerValue = (
+                maxY
+                * markerIndex
+                / 4
+            );
+
+            context.fillText(
+                markerValue.toFixed(
+                    maxY <= 5 ? 1 : 0
+                ) + suffix,
+                4,
+                yPosition + 4
+            );
+        }
+
+
+        const colors = [
+            "#2f80ed",
+            "#9b6de3"
+        ];
+
+
+        series.forEach(
+            function (
+                currentSeries,
+                seriesIndex
+            ) {
+
+                context.strokeStyle = (
+                    colors[seriesIndex]
+                );
+
+                context.lineWidth = 3;
+
+                context.beginPath();
+
+
+                rows.forEach(
+                    function (
+                        row,
+                        rowIndex
+                    ) {
+
+                        const xPosition = (
+                            padding.left
+                            + (
+                                rows.length === 1
+                                ? chartWidth / 2
+                                : (
+                                    chartWidth
+                                    * rowIndex
+                                    / (
+                                        rows.length - 1
+                                    )
+                                )
+                            )
+                        );
+
+                        const currentValue = Math.min(
+                            Number(
+                                row[
+                                    currentSeries.key
+                                ]
+                            ) || 0,
+                            maxY
+                        );
+
+                        const yPosition = (
+                            padding.top
+                            + chartHeight
+                            - (
+                                currentValue
+                                / maxY
+                                * chartHeight
+                            )
+                        );
+
+                        if (rowIndex === 0) {
+
+                            context.moveTo(
+                                xPosition,
+                                yPosition
+                            );
+
+                        } else {
+
+                            context.lineTo(
+                                xPosition,
+                                yPosition
+                            );
+
+                        }
+
+                    }
+                );
+
+                context.stroke();
+
+                context.fillStyle = (
+                    colors[seriesIndex]
+                );
+
+                context.fillText(
+                    currentSeries.label,
+                    padding.left
+                    + seriesIndex * 150,
+                    12
+                );
+
+            }
+        );
+
+
+        context.fillStyle = "#aab2bf";
+
+
+        rows.forEach(
+            function (
+                row,
+                rowIndex
+            ) {
+
+                if (
+                    rowIndex === 0
+                    || rowIndex === rows.length - 1
+                    || rowIndex % 3 === 0
+                ) {
+
+                    const xPosition = (
+                        padding.left
+                        + (
+                            rows.length === 1
+                            ? chartWidth / 2
+                            : (
+                                chartWidth
+                                * rowIndex
+                                / (
+                                    rows.length - 1
+                                )
+                            )
+                        )
+                    );
+
+                    context.fillText(
+                        String(
+                            row.minute
+                        ) + "'",
+                        xPosition - 8,
+                        height - 10
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    const xgMaximum = (
+        Math.max(
+            3,
+            ...rows.flatMap(
+                function (row) {
+
+                    return [
+                        Number(
+                            row.team1_xg
+                        ) || 0,
+
+                        Number(
+                            row.team2_xg
+                        ) || 0
+                    ];
+
+                }
+            )
+        )
+        + 0.5
+    );
+
+
+    drawLineChart(
+
+        "xgChart",
+
+        [
+            {
+                key: "team1_xg",
+                label: rows[0].team1_name
+            },
+
+            {
+                key: "team2_xg",
+                label: rows[0].team2_name
+            }
+        ],
+
+        xgMaximum,
+
+        ""
+
+    );
+
+
+    drawLineChart(
+
+        "possessionChart",
+
+        [
+            {
+                key: "team1_possession",
+                label: rows[0].team1_name
+            },
+
+            {
+                key: "team2_possession",
+                label: rows[0].team2_name
+            }
+        ],
+
+        100,
+
+        "%"
+
+    );
+
+})();
+
+</script>
+
+</body>
+</html>
