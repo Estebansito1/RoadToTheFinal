@@ -1,170 +1,163 @@
 Road to the Final
 =================
 
-Project Description
--------------------
-Road to the Final is a reusable sports prediction app for elimination-style tournaments.
+Project Overview
+----------------
+Road to the Final is a football prediction and match analytics application built with Python and Flask.
 
-The app predicts the winner of a match using team ratings, live match events, ball-control stats, and backtesting. It was first tested with World Cup-style soccer matches, but the structure can be reused for other sports like basketball, football, baseball, esports, or any tournament where teams are eliminated.
+The final goal of this project is to create a database-driven analytics platform for the 2027 FIFA Women's World Cup.
 
-The main idea is that a team may be stronger before the game, but live match data can change the prediction.
-
-
-Files Included
---------------
-main.py
-    Main program file. Runs the app, loads teams, predicts matches, runs backtests, and shows algorithm descriptions.
-
-live_feed.py
-    Demo live feed file. Simulates live match data such as goals, shots on target, possession, dangerous attacks, red cards, and bad player performance.
-
-teams.csv
-    Stores team ratings. The app loads teams from this file instead of hard-coding teams into the program.
-
-match_history.csv
-    Stores past match results. The app uses this file to test prediction accuracy.
+For now, the project will be tested and improved using regular-season club football data, such as Liga MX. This gives the team time to develop features, test live match data, improve the prediction model, and build the database before the Women's World Cup begins.
 
 
-How to Run the Program
-----------------------
-Open the RoadToTheFinal folder in VS Code.
+Main Goal
+---------
+The final version of the project should:
 
-In the terminal, run:
+- Store teams, matches, statistics, events, and predictions in a real database
+- Use live or historical football data
+- Calculate win, draw, and loss probabilities
+- Calculate expected goals
+- Track live momentum and attack pressure
+- Store prediction history over time
+- Compare teams using recent form and head-to-head history
+- Display the information through a Flask web application
+- Support the 2027 FIFA Women's World Cup without rewriting the core prediction system
 
-python3 main.py
 
-Then follow the menu instructions.
+Current Development Strategy
+----------------------------
+The same prediction system will be reused for different competitions.
+
+Current testing:
+Liga MX / regular-season football
+
+Final target:
+2027 FIFA Women's World Cup
+
+The core Python prediction code should remain reusable. Team names, competition names, API IDs, and tournament-specific information should not be hard-coded into the prediction engine.
+
+
+Current Architecture
+--------------------
+API-Football
+    |
+    v
+Python / Flask
+    |
+    +---- Prediction Model
+    |       - Win probability
+    |       - Poisson expected goals
+    |       - Live momentum
+    |       - Attack pressure
+    |       - Confidence
+    |
+    +---- Current Data Files
+    |       - teams.csv
+    |       - match_history.csv
+    |       - historical_snapshots.csv
+    |
+    v
+HTML / CSS Web Dashboard
+
+
+Planned Database Architecture
+-----------------------------
+For the CS514 final project, the CSV and cache-based storage will be expanded into a real relational database.
+
+Possible database tables:
+
+- Competitions
+- Teams
+- Matches
+- MatchStatistics
+- MatchEvents
+- Predictions
+
+The database will use concepts from CS514 such as:
+
+- Primary keys
+- Foreign keys
+- Relationships
+- Normalization
+- SELECT, INSERT, UPDATE, and DELETE
+- Joins
+- Aggregate functions
+- Constraints
+- Indexes
+- Transactions
+- Database programming
 
 
 Main Features
 -------------
-1. Show live prediction
-2. Add goal
-3. Add red card
-4. Add bad player performance
-5. Add injury / missing player
-6. Update possession
-7. Add shot on target
-8. Add dangerous attack
-9. Start new match
-10. Pre-game backtest past matches
-11. Update from live feed
-12. Live backtest past matches
-13. Show algorithm descriptions
-14. Exit
+Current features include:
+
+- Team selection
+- Win / draw / loss probabilities
+- Poisson expected goals
+- Most likely final score
+- Top scoreline probabilities
+- Live momentum
+- Attack pressure
+- Match statistics
+- Event timeline
+- Prediction confidence
+- Match difficulty
+- Head-to-head analysis
+- Recent form
+- Historical backtesting
+- Live API-Football integration
+- Tournament simulation
 
 
-Algorithms Used
----------------
-1. Weighted Team Rating Algorithm
-Uses offense, defense, form, star power, and clutch rating to create a pre-game score.
-
-2. Event Modifier Algorithm
-Adds or subtracts points when important events happen, such as injuries, red cards, or bad player performance.
-
-3. Live Event Score Algorithm
-Totals all live event changes and adjusts the team's live score.
-
-4. Ball-Control Momentum Algorithm
-Uses possession, shots on target, and dangerous attacks to estimate which team is creating better chances.
-
-5. Scoreline Impact Algorithm
-Adds points for goals because scoring changes the probability of winning.
-
-6. Red Card Penalty Algorithm
-Subtracts points when a team receives a red card.
-
-7. Live Score Algorithm
-Combines base rating, live events, ball-control stats, goals, and red cards into one live score.
-
-8. Probability Algorithm
-Converts each team’s live score into a win probability.
-
-9. Winner Prediction Algorithm
-Predicts the team with the higher live score. If the scores are tied, clutch rating is used as the tiebreaker.
-
-10. Data Loading Algorithm
-Loads teams from teams.csv so the program can be reused without changing the code.
-
-11. Pre-game Backtest Algorithm
-Tests past matches using only team ratings to see who the app would have picked before the match started.
-
-12. Live Backtest Algorithm
-Tests past matches again after applying live data to see if live information improves the prediction.
-
-13. Prediction Reasoning Algorithm
-Explains why the app favors one team by comparing goals, red cards, shots on target, dangerous attacks, possession, and event modifiers.
-
-
-Example Result
---------------
-One example tested was Brazil vs Norway.
-
-Pre-game prediction:
-Brazil was predicted to win because Brazil had stronger base ratings.
-
-Live prediction:
-Norway was predicted to win after live data was applied.
-
-Reason:
-Norway had more goals.
-Norway had more shots on target.
-Norway was creating more dangerous attacks.
-Brazil had more possession, but Norway was creating better chances.
-Brazil's star player was not playing well.
-
-This shows why live data matters. A team can be stronger before the game, but the live performance can change the prediction.
-
-
-Backtest Result
----------------
-The app showed:
-
-Pre-game Accuracy: 80%
-Live Accuracy: 100%
-
-This means the live-data model performed better than the pre-game model in the test matches.
-
-
-How to Edit Teams
+Project Structure
 -----------------
-To add or change teams, edit teams.csv.
+app.py
+    Main Flask application and prediction model.
 
-Format:
+live_feed.py
+    Handles live API-Football match data.
 
-name,offense,defense,form,star_power,clutch
+insights.py
+    Handles pre-match data such as team lookup, head-to-head history, and recent form.
 
-Example:
+main.py
+    Optional terminal interface and historical backtesting.
 
-France,92,90,93,95,87
+teams.csv
+    Current team ratings used by the prediction model.
 
+match_history.csv
+    Historical match data used for testing.
 
-How to Edit Match History
--------------------------
-To add past matches, edit match_history.csv.
+historical_snapshots.csv
+    Historical in-match snapshots used for live backtesting.
 
-Format:
+templates/index.html
+    Main Flask webpage.
 
-team1,team2,actual_winner,team1_goals,team2_goals
+static/style.css
+    Dashboard styling.
 
-Example:
-
-Brazil,Norway,Norway,1,2
-
-
-Future Improvements
--------------------
-Possible future upgrades:
-
-Connect to a real sports API
-Add a full tournament bracket
-Add a website interface
-Save prediction results
-Add charts and probability bars
-Add player-level stats
-Add support for different sports
+.env
+    Stores private API credentials locally.
+    This file is not uploaded to GitHub.
 
 
-Author
-------
-Road to the Final was created as a coding project to practice algorithms, object-oriented programming, CSV data loading, probability, live data updates, and sports analytics.
+Team Development Guidelines
+---------------------------
+When adding features:
+
+- Do not hard-code specific teams or leagues into the prediction engine.
+- Keep features reusable for both club and national-team football.
+- Use configuration or database records for competition-specific information.
+- Keep API keys and private credentials out of GitHub.
+- Make meaningful GitHub commits so individual contributions can be tracked.
+
+
+Final Project Vision
+--------------------
+The final product will be a database-driven Women's World Cup analytics platform that combines football data, historical information, live match statistics, and prediction algorithms into one web application.
+
+The goal is to build something that can continue beyond CS514 as a portfolio project and potentially be expanded for future football tournaments.
