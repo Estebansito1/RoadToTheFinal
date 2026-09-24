@@ -56,7 +56,6 @@ from live_feed import apply_live_data_to_match
 
 
 app = Flask(__name__)
-
 app.secret_key = os.getenv(
     "FLASK_SECRET_KEY",
     "road-to-the-final-development-key"
